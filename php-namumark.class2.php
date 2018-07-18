@@ -84,7 +84,7 @@ class NamuMark2 extends NamuMark {
             if(preg_match('/\|-/', $text))
                 return $type.$text.$type;
             else
-                return '<poem style="border: 2px solid #d6d2c5; background-color: #f9f4e6; padding: 1em;">'.$text.'</poem>';
+                return '<div style="border: 1px solid; padding: 10px;">'.$text.'</div>';
         } else {
             $lines = explode("\n", $text);
             $text = '';

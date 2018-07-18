@@ -1,12 +1,10 @@
 <?php
 
 class NamuMarkExtra {
-
 	function __construct($text, $title) {
 		$this->text = $text;
 		$this->title = $title;
 	}
-
 	
 	public function indent() {
 		if(preg_match_all('/^( +)([^* ][^\n]*)$/m', $this->text, $indent, PREG_SET_ORDER)) {

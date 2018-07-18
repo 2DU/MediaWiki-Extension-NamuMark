@@ -19,9 +19,7 @@
  */
  
 class NamuMark {
-
     function __construct($wtext, $title) {
-
         $this->list_tag = array(
             array('*', 'ul'),
             array('1.', 'ol'),
@@ -276,7 +274,7 @@ class NamuMark {
         }
         $text = preg_replace('/(https?.*?(\.jpeg|\.jpg|\.png|\.gif))/', '<img src="$1">', $text);
         if(preg_match('/(.*)\|(\[\[파일:.*)\]\]/', $text, $filelink))
-            return $filelink[2].'|link='.str_replace(' ', '_',$filelink[1]).']]';
+            return $filelink[2].'|link='.str_replace(' ', '_', $filelink[1]).']]';
         if(preg_match('/^(파일:.*?(?!\.jpeg|\.jpg|\.png|\.gif))\|(.*)/i', $text, $namu_image)) {
             $properties = explode("&", $namu_image[2]);
 
@@ -740,10 +738,12 @@ class NamuMark {
 	}
 
     protected function textProcessor($otext, $type) {
-        if($type != '{{{' && $type != '<nowiki>')
+        if($type != '{{{' && $type != '<nowiki>') {
             $text = $this->formatParser($otext);
-        else
+        } else {
             $text = $otext;
+        }
+            
         switch($type) {
             case '--':
             case '~~':
@@ -763,7 +763,7 @@ class NamuMark {
             case '<!--':
                 return '<!--'.$text.'-->';
             case '{{|':
-                return '<poem style="border: 2px solid #d6d2c5; background-color: #f9f4e6; padding: 1em;">'.$text.'</poem>';
+                return '<div style="border: 1px solid; padding: 10px;">'.$text.'</div>';
             case '<nowiki>':
                 return '<nowiki>'.$text.'</nowiki>';
             case '{{{':
@@ -908,14 +908,6 @@ class NamuMark {
         $result .= ($tag=='indent'?'':'</'.$tag.'>');
         $result .= "\n";
         return $result;
-    }
-
-    protected function blockParser($block) {
-        return $this->formatParser($block);
-    }
-
-    protected function renderProcessor($text, $type) {
-
     }
 
 }
