@@ -50,11 +50,11 @@ class NamuMark1 extends NamuMark {
 
             if(self::startsWithi($text, '#!html')) {
                 return '<html>' . preg_replace('/UNIQ--.*?--QINU/', '', substr($text, 7)) . '</html>';
-            } elseif(self::startsWithi($text, '#!wiki') && preg_match('/([^\n]*)\n(((((.*)(\n)?)+)))/', substr($text, 7), $match)) {
+            } else if(self::startsWithi($text, '#!wiki') && preg_match('/#!wiki ([^\n]*)\n((?:(?:(?:(?:.*)(?:\n)?)+)))/', $text, $match)) {
                 return '<div '.$match[1].'>'.$match[2].'</div>';
-            } elseif(self::startsWithi($text, '#!syntax') && preg_match('/#!syntax ([^\s]*)/', $text, $match)) {
+            } else if(self::startsWithi($text, '#!syntax') && preg_match('/#!syntax ([^\s]*)/', $text, $match)) {
                 return '<syntaxhighlight lang="' . $match[1] . '" line="1">' . preg_replace('/#!syntax ([^\s]*)/', '', $text) . '</syntaxhighlight>';
-            } elseif(preg_match('/^\+([1-5])(.*)$/sm', $text, $size)) {
+            } else if(preg_match('/^\+([1-5])(.*)$/sm', $text, $size)) {
                 for ($i=1; $i<=$size[1]; $i++){
                     if(isset($big_before) && isset($big_after)) {
                         $big_before .= '<big>';
@@ -78,7 +78,7 @@ class NamuMark1 extends NamuMark {
                 }
 
                 return $big_before.$this->formatParser($size[2]).$big_after;
-            } elseif(preg_match('/^\-([1-5])(.*)$/sm', $text, $size)) {
+            } else if(preg_match('/^\-([1-5])(.*)$/sm', $text, $size)) {
                 for ($i = 1; $i <= $size[1]; $i++) {
                     if (isset($small_before) && isset($small_after)) {
                         $small_before .= '<small>';

@@ -234,15 +234,15 @@ class NamuMark {
                                     $innerhtml .= '</blockquote>' . "\n";
                                 }
                             }
-                        } elseif (strlen($match[1]) < strlen($matches[$line - 1][1])) {
+                        } else if (strlen($match[1]) < strlen($matches[$line - 1][1])) {
                             for ($n = 1; $n <= strlen($matches[$line - 1][1]) - strlen($match[1]); $n++) {
                                 $innerhtml .= '</blockquote>' . "\n";
                             }
                             $innerhtml .= $match[2] . "\n";
-                        } elseif (strlen($match[1]) == strlen($matches[$line - 1][1])) {
+                        } else if (strlen($match[1]) == strlen($matches[$line - 1][1])) {
                             $innerhtml .= '</br>' . $match[2] . "\n";
                         }
-                    } elseif (!isset($matches[$line - 1])) {
+                    } else if (!isset($matches[$line - 1])) {
                         for ($n = 1; $n <= strlen($match[1]); $n++) {
                             $innerhtml .= '<blockquote>' . "\n";
                         }
@@ -307,9 +307,9 @@ class NamuMark {
 
             if(isset($imgwidth) && isset($imgheight))
                 $property .= $imgwidth[1] . 'x' . $imgheight[1] . 'px|';
-            elseif(isset($imgwidth))
+            else if(isset($imgwidth))
                 $property .= $imgwidth[1].'px|';
-            elseif(isset($imgheight))
+            else if(isset($imgheight))
                 $property .= 'x'.$imgheight[1].'px|';
 
             $property = substr($property, 0, -1);
@@ -349,9 +349,9 @@ class NamuMark {
                         }
                         array_push($this->refnames, $note[1]);
                         return '<ref name="' . $note[1] . '">' . $note[2] . '</ref>';
-                    } elseif(isset($note[2]))
+                    } else if(isset($note[2]))
                         return '<ref>'.$note[2].'</ref>';
-                    elseif(isset($note[1]))
+                    else if(isset($note[1]))
                         return '<ref name="'.$note[1].'" />';
                 }
                 if(preg_match('/^(youtube|nicovideo)\((.*)\)$/i', $text, $video_code))
@@ -377,10 +377,10 @@ class NamuMark {
             if($option[0] == 'width') {
                 $width = $option[1];
                 continue;
-            } elseif ($option[0] == 'height') {
+            } else if ($option[0] == 'height') {
                 $height = $option[1];
                 continue;
-            } elseif (preg_match('/(\d+)x(\d+)/', $value, $match)) {
+            } else if (preg_match('/(\d+)x(\d+)/', $value, $match)) {
                 $width = $match[1];
                 $height = $match[2];
                 continue;
@@ -391,9 +391,9 @@ class NamuMark {
 
         if(isset($width) && isset($height))
             $text .= '|dimensions='.$width.'x'.$height;
-        elseif(isset($width))
+        else if(isset($width))
             $text .= '|dimensions='.$width;
-        elseif(isset($height))
+        else if(isset($height))
             $text .= '|dimensions=x'.$height;
 
         return $text.'}}';
@@ -446,11 +446,11 @@ class NamuMark {
 			if(self::startsWith($text, $bracket['open'], $i) && !($bracket['open']==$bracket['close'] && $cnt>0)) {
 				$cnt++;
 				$done = true;
-				$i+=$openlen-1; // �ݺ��� �� ������ ���̹Ƿ�
-			}elseif(self::startsWith($text, $bracket['close'], $i)) {
+				$i+=$openlen-1;
+			}else if(self::startsWith($text, $bracket['close'], $i)) {
 				$cnt--;
 				$i+=$closelen-1;
-			}elseif(!$bracket['multiline'] && $text[$i] == "\n")
+			}else if(!$bracket['multiline'] && $text[$i] == "\n")
 				return false;
 
 			if($cnt == 0 && $done) {
@@ -474,11 +474,11 @@ class NamuMark {
 		}else{
 			if($char < 224){
 				$bytes = 2;
-			}elseif($char < 240){
+			}else if($char < 240){
 				$bytes = 3;
-			}elseif($char < 248){
+			}else if($char < 248){
 				$bytes = 4;
-			}elseif($char == 252){
+			}else if($char == 252){
 				$bytes = 5;
 			}else{
 				$bytes = 6;
@@ -496,11 +496,11 @@ class NamuMark {
 		}else{
 			if($char < 224){
 				$bytes = 2;
-			}elseif($char < 240){
+			}else if($char < 240){
 				$bytes = 3;
-			}elseif($char < 248){
+			}else if($char < 248){
 				$bytes = 4;
-			}elseif($char == 252){
+			}else if($char == 252){
 				$bytes = 5;
 			}else{
 				$bytes = 6;
@@ -541,26 +541,30 @@ class NamuMark {
 		$tableInnerStr = '';
 		$tableStyleList = array();
         $caption = '';
-        for($i=$offset;$i<$len;$i=self::seekEndOfLine($text, $i)+1) {
+        
+        for($i = $offset; $i < $len; $i = self::seekEndOfLine($text, $i) + 1) {
 			$now = self::getChar($text,$i);
 			$eol = self::seekEndOfLine($text, $i);
-			if(!self::startsWith($text, '||', $i)) {
+            
+            if(!self::startsWith($text, '||', $i)) {
 				// table end
                 break;
-			}
+            }
+            
 			$line = substr($text, $i, $eol-$i);
 			$td = explode('||', $line);
 			$td_cnt = count($td);
 
 			$trInnerStr = '';
-			$simpleColspan = 0;
-			for($j=1;$j<$td_cnt-1;$j++) {
+            $simpleColspan = 0;
+            
+			for($j = 1; $j < $td_cnt - 1; $j++) {
 				$innerstr = htmlspecialchars_decode($td[$j]);
 
 				if($innerstr=='') {
 					$simpleColspan += 1;
 					continue;
-				} elseif(preg_match('/^\|.*?\|/', $innerstr)) {
+				} else if(preg_match('/^\|.*?\|/', $innerstr)) {
                     $caption_r = explode('|', $innerstr);
                     $caption = '<caption>'.$caption_r[1].'</caption>';
                     $innerstr = $caption_r[2];
@@ -574,8 +578,6 @@ class NamuMark {
 					$simpleColspan = 0;
 				}
 				
-
-
 				while(self::startsWith($innerstr, '<') && !preg_match('/^<[^<]*?>([^<]*?)<\/.*?>/', $innerstr) && !self::startsWithi($innerstr, '<br')) {
 					$dummy=0;
 					$prop = $this->bracketParser($innerstr, $dummy, array('open'	=> '<', 'close' => '>','multiline' => false,'processor' => function($str) { return $str; }));
@@ -627,31 +629,31 @@ class NamuMark {
 									}
 								}
 							}
-							elseif(preg_match('/^(\||\-|v|\^)\|?([0-9]+)$/', $prop, $span)) {
+							else if(preg_match('/^(\||\-|v|\^)\|?([0-9]+)$/', $prop, $span)) {
 								if($span[1] == '-') {
 									$tdAttr['colspan'] = $span[2];
 									break;
 								}
-								elseif($span[1] == '|') {
+								else if($span[1] == '|') {
 									$tdAttr['rowspan'] = $span[2];
 									break;
 								}
-								elseif($span[1] == '^') {
+								else if($span[1] == '^') {
 									$tdAttr['rowspan'] = $span[2];
 									$tdStyleList['vertical-align'] = 'top';
 									break;
 								}
-								elseif($span[1] == 'v') {
+								else if($span[1] == 'v') {
 									$tdAttr['rowspan'] = $span[2];
 									$tdStyleList['vertical-align'] = 'bottom';
 									break;
 								}
 							}
-							elseif(preg_match('/^#(?:([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})|([A-Za-z]+))$/', $prop, $span)) {
+							else if(preg_match('/^#(?:([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})|([A-Za-z]+))$/', $prop, $span)) {
 								$tdStyleList['background-color'] = $span[1]?'#'.$span[1]:$span[2];
 								break;
 							}
-							elseif(preg_match('/^([^=]+)=(?|"(.*)"|\'(.*)\'|(.*))$/', $prop, $match)) {
+							else if(preg_match('/^([^=]+)=(?|"(.*)"|\'(.*)\'|(.*))$/', $prop, $match)) {
 								switch($match[1]) {
 									case 'bgcolor':
 										$tdStyleList['background-color'] = $match[2];
@@ -675,9 +677,9 @@ class NamuMark {
                 if(empty($tdStyleList['text-align'])) {
                     if(self::startsWith($innerstr, ' ') && self::endsWith($innerstr, ' '))
                         $tdStyleList['text-align'] = 'center';
-                    elseif(self::startsWith($innerstr, ' ') && !self::endsWith($innerstr, ' '))
+                    else if(self::startsWith($innerstr, ' ') && !self::endsWith($innerstr, ' '))
                         $tdStyleList['text-align'] = null;
-                    elseif(!self::startsWith($innerstr, ' ') && self::endsWith($innerstr, ' '))
+                    else if(!self::startsWith($innerstr, ' ') && self::endsWith($innerstr, ' '))
                         $tdStyleList['text-align'] = 'right';
                     else
                         $tdStyleList['text-align'] = null;
@@ -769,13 +771,15 @@ class NamuMark {
                     $html = substr($text, 6);
                     $html = htmlspecialchars_decode($html);
                     return '<html>'.$html.'</html>';
-                } elseif(self::startsWithi($text, '#!syntax') && preg_match('/#!syntax ([^\s]*)/', $text, $match)) {
+                } else if(self::startsWithi($text, '#!wiki') && preg_match('/#!wiki (style=["\'][^"\']*["\'])/', $text, $match)) {
+                    return '<div '.$match[1].'>'.preg_replace('/#!wiki style=["\']([^"\']*)["\'] *<br \/>/', '', $text).'</div>';
+                } else if(self::startsWithi($text, '#!syntax') && preg_match('/#!syntax ([^\s]*)/', $text, $match)) {
                     return '<syntaxhighlight lang="'.$match[1].'" line="1">'.preg_replace('/#!syntax ([^\s]*)/', '', $text).'</syntaxhighlight>';
-                } elseif(preg_match('/^#(?:([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})|([A-Za-z]+)) (.*)$/', $text, $color)) {
+                } else if(preg_match('/^#(?:([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})|([A-Za-z]+)) (.*)$/', $text, $color)) {
                     if(empty($color[1]) && empty($color[2]))
                         return $text;
                     return '<span style="color: '.(empty($color[1])?$color[2]:'#'.$color[1]).'">'.$this->formatParser($color[3]).'</span>';
-                } elseif(preg_match('/^\+([1-5]) (.*)$/', $text, $size)) {
+                } else if(preg_match('/^\+([1-5]) (.*)$/', $text, $size)) {
                     for ($i=1; $i<=$size[1]; $i++){
                         if(isset($big_before) && isset($big_after)) {
                             $big_before .= '<big>';
@@ -787,7 +791,7 @@ class NamuMark {
                     }
 
                     return $big_before.$this->formatParser($size[2]).$big_after;
-                } elseif(preg_match('/^\-([1-5]) (.*)$/', $text, $size)) {
+                } else if(preg_match('/^\-([1-5]) (.*)$/', $text, $size)) {
                     for ($i=1; $i<=$size[1]; $i++){
                         if(isset($small_before) && isset($small_after)) {
                             $small_before .= '<small>';

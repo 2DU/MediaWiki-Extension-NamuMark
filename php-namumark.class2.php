@@ -26,9 +26,6 @@ class NamuMark2 extends NamuMark {
         $block = $this->formatParser($block);
 		$result = '';
 
-
-
-
 		if($wgAllowExternalImages || (!$wgAllowExternalImages && $wgAllowExternalImagesFrom) || (!$wgAllowExternalImages && $wgEnableImageWhitelist)) {
             if(preg_match("/^(.*?)(?<!<nowiki>|\[)(https?[^<]*?)(\.jpeg|\.jpg|\.png|\.gif)([?&][^< ']+)(?!<\/nowiki>)(.*)$/i", $block, $match)) {
                 $approve = false;
@@ -43,9 +40,9 @@ class NamuMark2 extends NamuMark {
                             break;
                         }
                     }
-                } elseif($wgAllowExternalImages) {
+                } else if($wgAllowExternalImages) {
                     $approve = true;
-                } elseif($wgEnableImageWhitelist) {
+                } else if($wgEnableImageWhitelist) {
                     $titleObject = Title::newFromText( 'MediaWiki:External image whitelist' );
                     if ($titleObject->exists()) {
                         $article = new WikiPage($titleObject);
@@ -112,9 +109,9 @@ class NamuMark2 extends NamuMark {
                 require_once("XSSfilter.php");
                 $xss = new XssHtml($text);
                 return $xss->getHtml();
-            } elseif(self::startsWithi($text, '#!syntax') && preg_match('/#!syntax ([^\s]*)/', $text, $match)) {
+            } else if(self::startsWithi($text, '#!syntax') && preg_match('/#!syntax ([^\s]*)/', $text, $match)) {
                 return '<syntaxhighlight lang="' . $match[1] . '" line="1">' . preg_replace('/#!syntax ([^\s]*)/', '', $text) . '</syntaxhighlight>';
-            } elseif(preg_match('/^\+([1-5])(.*)$/sm', $text, $size)) {
+            } else if(preg_match('/^\+([1-5])(.*)$/sm', $text, $size)) {
                 for ($i=1; $i<=$size[1]; $i++){
                     if(isset($big_before) && isset($big_after)) {
                         $big_before .= '<big>';
@@ -138,7 +135,7 @@ class NamuMark2 extends NamuMark {
                 }
 
                 return $big_before.$this->formatParser($size[2]).$big_after;
-            } elseif(preg_match('/^\-([1-5])(.*)$/sm', $text, $size)) {
+            } else if(preg_match('/^\-([1-5])(.*)$/sm', $text, $size)) {
                 for ($i = 1; $i <= $size[1]; $i++) {
                     if (isset($small_before) && isset($small_after)) {
                         $small_before .= '<small>';

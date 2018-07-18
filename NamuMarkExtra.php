@@ -130,10 +130,10 @@ class NamuMarkExtra {
 				$this->text .= $line . "\n";
 				$is_pre = true;
 				continue;
-			} elseif(isset($is_pre) && $is_pre === true && preg_match('@</pre>@i', $line)) {
+			} else if(isset($is_pre) && $is_pre === true && preg_match('@</pre>@i', $line)) {
 				// pre 태그 끝
 				$is_pre = false;
-			} elseif(isset($is_pre) && $is_pre === true) {
+			} else if(isset($is_pre) && $is_pre === true) {
 				$this->text .= $line . "\n";
 				continue;
 			}
