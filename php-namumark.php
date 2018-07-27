@@ -34,23 +34,26 @@ class NamuMark {
                 'open'	=> '{{{',
                 'close' => '}}}',
                 'multiline' => true,
-                'processor' => array($this,'renderProcessor')),
+                'processor' => array($this,'renderProcessor')
+            ),
             array(
                 'open'	=> '<pre>',
                 'close' => '</pre>',
                 'multiline' => true,
-                'processor' => array($this,'renderProcessor')),
+                'processor' => array($this,'renderProcessor')
+            ),
             array(
                 'open'	=> '{{|',
                 'close' => '|}}',
                 'multiline' => true,
-                'processor' => array($this,'renderProcessor')),
+                'processor' => array($this,'renderProcessor')
+            ),
             array(
                 'open'	=> '<nowiki>',
                 'close' => '</nowiki>',
                 'multiline' => true,
-                'processor' => array($this,'renderProcessor')),
-
+                'processor' => array($this,'renderProcessor')
+            ),
         );
 
         $this->single_bracket = array(
@@ -58,67 +61,80 @@ class NamuMark {
                 'open'	=> '{{{',
                 'close' => '}}}',
                 'multiline' => false,
-                'processor' => array($this,'textProcessor')),
+                'processor' => array($this,'textProcessor')
+            ),
             array(
                 'open'	=> '[[',
                 'close' => ']]',
                 'multiline' => false,
-                'processor' => array($this,'linkProcessor')),
+                'processor' => array($this,'linkProcessor')
+            ),
             array(
                 'open'	=> '{{|',
                 'close' => '|}}',
                 'multiline' => false,
-                'processor' => array($this,'textProcessor')),
+                'processor' => array($this,'textProcessor')
+            ),
             array(
                 'open'	=> '{{',
                 'close' => '}}',
                 'multiline' => false,
-                'processor' => array($this,'mediawikiProcessor')),
+                'processor' => array($this, 'mediawikiProcessor')
+            ),
             array(
                 'open'	=> '[',
                 'close' => ']',
                 'multiline' => false,
-                'processor' => array($this,'macroProcessor')),
+                'processor' => array($this,'macroProcessor')
+            ),
             array(
                 'open'	=> '~~',
                 'close' => '~~',
                 'multiline' => false,
-                'processor' => array($this,'textProcessor')),
+                'processor' => array($this,'textProcessor')
+            ),
             array(
                 'open'	=> '--',
                 'close' => '--',
                 'multiline' => false,
-                'processor' => array($this,'textProcessor')),
+                'processor' => array($this,'textProcessor')
+            ),
             array(
                 'open'	=> '__',
                 'close' => '__',
                 'multiline' => false,
-                'processor' => array($this,'textProcessor')),
+                'processor' => array($this,'textProcessor')
+            ),
             array(
                 'open'	=> '^^',
                 'close' => '^^',
                 'multiline' => false,
-                'processor' => array($this,'textProcessor')),
+                'processor' => array($this,'textProcessor')
+            ),
             array(
                 'open'	=> ',,',
                 'close' => ',,',
                 'multiline' => false,
-                'processor' => array($this,'textProcessor')),
+                'processor' => array($this,'textProcessor')
+            ),
             array(
                 'open'	=> '$ ',
                 'close' => ' $',
                 'multiline' => false,
-                'processor' => array($this,'textProcessor')),
+                'processor' => array($this,'textProcessor')
+            ),
             array(
                 'open'	=> '<!--',
                 'close' => '-->',
                 'multiline' => false,
-                'processor' => array($this,'textProcessor')),
+                'processor' => array($this,'textProcessor')
+            ),
             array(
                 'open'	=> '<nowiki>',
                 'close' => '</nowiki>',
                 'multiline' => false,
-                'processor' => array($this,'textProcessor')),
+                'processor' => array($this,'textProcessor')
+            ),
         );
 
         $this->WikiPage = $wtext;
@@ -271,54 +287,58 @@ class NamuMark {
                 return '['.$ex_link[0].' '.$ex_link[count($ex_link) - 1].']';
             else
                 return '['.$ex_link[0].']';
-        }
-        $text = preg_replace('/(https?.*?(\.jpeg|\.jpg|\.png|\.gif))/', '<img src="$1">', $text);
-        if(preg_match('/(.*)\|(\[\[파일:.*)\]\]/', $text, $filelink))
-            return $filelink[2].'|link='.str_replace(' ', '_', $filelink[1]).']]';
-        if(preg_match('/^(파일:.*?(?!\.jpeg|\.jpg|\.png|\.gif))\|(.*)/i', $text, $namu_image)) {
-            $properties = explode("&", $namu_image[2]);
+        } else {
+            $text = preg_replace('/(https?.*?(\.jpeg|\.jpg|\.png|\.gif))/', '<img src="$1">', $text);
+            if(preg_match('/(.*)\|(\[\[파일:.*)\]\]/', $text, $filelink)) {
+                return $filelink[2].'|link='.str_replace(' ', '_', $filelink[1]).']]';
+            } else {
+                if(preg_match('/^(파일:.*?(?!\.jpeg|\.jpg|\.png|\.gif))\|(.*)/i', $text, $namu_image)) {
+                    $properties = explode("&", $namu_image[2]);
 
-            foreach($properties as $n => $each_property) {
-                if(preg_match('/^width=(.*)/i', $each_property, $width)) {
-                    if(self::endsWith($width[1], '%'))
-                        continue;
-                    $imgwidth[1] = str_ireplace('px', '', $width[1]);
-                    unset($properties[$n]);
-                    continue;
+                    foreach($properties as $n => $each_property) {
+                        if(preg_match('/^width=(.*)/i', $each_property, $width)) {
+                            if(self::endsWith($width[1], '%'))
+                                continue;
+                            $imgwidth[1] = str_ireplace('px', '', $width[1]);
+                            unset($properties[$n]);
+                            continue;
+                        }
+
+                        if(preg_match('/^height=(.*)/i', $each_property, $height)) {
+                            if(self::endsWith($height[1], '%'))
+                                continue;
+                            $imgheight[1] = str_ireplace('px', '', $height[1]);
+                            unset($properties[$n]);
+                            continue;
+                        }
+
+                        $properties[$n] = str_ireplace('align=', '', $each_property);
+                    }
+
+                    $property = '|';
+                    foreach($properties as $n => $each_property)
+                        $property .= $each_property.'|';
+
+                    if(isset($imgwidth) && isset($imgheight))
+                        $property .= $imgwidth[1] . 'x' . $imgheight[1] . 'px|';
+                    else if(isset($imgwidth))
+                        $property .= $imgwidth[1].'px|';
+                    else if(isset($imgheight))
+                        $property .= 'x'.$imgheight[1].'px|';
+
+                    $property = substr($property, 0, -1);
+
+                    return '[['.$namu_image[1].$property.']]';
+                } else {
+                    return '[[' . $this->formatParser(preg_replace('/<\/?nowiki>/', '', $text)) . ']]';
                 }
-
-                if(preg_match('/^height=(.*)/i', $each_property, $height)) {
-                    if(self::endsWith($height[1], '%'))
-                        continue;
-                    $imgheight[1] = str_ireplace('px', '', $height[1]);
-                    unset($properties[$n]);
-                    continue;
-                }
-
-                $properties[$n] = str_ireplace('align=', '', $each_property);
             }
-
-
-            $property = '|';
-            foreach($properties as $n => $each_property)
-                $property .= $each_property.'|';
-
-            if(isset($imgwidth) && isset($imgheight))
-                $property .= $imgwidth[1] . 'x' . $imgheight[1] . 'px|';
-            else if(isset($imgwidth))
-                $property .= $imgwidth[1].'px|';
-            else if(isset($imgheight))
-                $property .= 'x'.$imgheight[1].'px|';
-
-            $property = substr($property, 0, -1);
-
-            return '[['.$namu_image[1].$property.']]';
         }
-        return '[[' . $this->formatParser($text) . ']]';
     }
 
     protected function macroProcessor($text, $type) {
         $text = $this->formatParser($text);
+
         switch(strtolower($text)) {
             case 'br':
                 return '<br>';
