@@ -45,7 +45,7 @@
 			$text = preg_replace('/<font color="(.*?)">(.*?)<\/font>\]\]/i', '{{글씨 색|$1|$2}}]]', $text);
 
 			# 버그 요소 제거
-			$text = preg_replace('/{{{\|}}}/', '<nowiki>|</nowiki>', $text);
+			$text = preg_replace('/{{{(\|+)}}}/', '<nowiki>$1</nowiki>', $text);
 			$text = preg_replace('/\\\\\\\/', '<slash>', $text);
 			$text = preg_replace('/\\\(.)/', '<nowiki>$1</nowiki>', $text);
 			$text = preg_replace("/<slash>/", "\\", $text);

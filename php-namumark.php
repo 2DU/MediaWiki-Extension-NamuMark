@@ -465,10 +465,10 @@ class NamuMark {
 				$cnt++;
 				$done = true;
 				$i+=$openlen-1;
-			}else if(self::startsWith($text, $bracket['close'], $i)) {
+			} else if(self::startsWith($text, $bracket['close'], $i)) {
 				$cnt--;
 				$i+=$closelen-1;
-			}else if(!$bracket['multiline'] && $text[$i] == "\n")
+			} else if(!$bracket['multiline'] && $text[$i] == "\n")
 				return false;
 
 			if($cnt == 0 && $done) {
@@ -489,16 +489,16 @@ class NamuMark {
 		$char = ord($string[$pointer]);
 		if($char < 128){
 			return $string[$pointer];
-		}else{
+		} else{
 			if($char < 224){
 				$bytes = 2;
-			}else if($char < 240){
+			} else if($char < 240){
 				$bytes = 3;
-			}else if($char < 248){
+			} else if($char < 248){
 				$bytes = 4;
-			}else if($char == 252){
+			} else if($char == 252){
 				$bytes = 5;
-			}else{
+			} else{
 				$bytes = 6;
 			}
 			$str = substr($string, $pointer, $bytes);
@@ -511,16 +511,16 @@ class NamuMark {
 		$char = ord($string[$pointer]);
 		if($char < 128){
 			return $string[$pointer++];
-		}else{
+		} else{
 			if($char < 224){
 				$bytes = 2;
-			}else if($char < 240){
+			} else if($char < 240){
 				$bytes = 3;
-			}else if($char < 248){
+			} else if($char < 248){
 				$bytes = 4;
-			}else if($char == 252){
+			} else if($char == 252){
 				$bytes = 5;
-			}else{
+			} else{
 				$bytes = 6;
 			}
 			$str = substr($string, $pointer, $bytes);
@@ -796,9 +796,11 @@ class NamuMark {
                 } else if(self::startsWithi($text, '#!syntax') && preg_match('/#!syntax ([^\s]*)/', $text, $match)) {
                     return '<syntaxhighlight lang="'.$match[1].'" line="1">'.preg_replace('/#!syntax ([^\s]*)/', '', $text).'</syntaxhighlight>';
                 } else if(preg_match('/^#(?:([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})|([A-Za-z]+)) (.*)$/', $text, $color)) {
-                    if(empty($color[1]) && empty($color[2]))
+                    if(empty($color[1]) && empty($color[2])) {
                         return $text;
-                    return '<span style="color: '.(empty($color[1])?$color[2]:'#'.$color[1]).'">'.$this->formatParser($color[3]).'</span>';
+                    } else {
+                        return '<span style="color: '.(empty($color[1])?$color[2]:'#'.$color[1]).'">'.$this->formatParser($color[3]).'</span>';
+                    }
                 } else if(preg_match('/^\+([1-5]) (.*)$/', $text, $size)) {
                     for ($i=1; $i<=$size[1]; $i++){
                         if(isset($big_before) && isset($big_after)) {
@@ -824,7 +826,7 @@ class NamuMark {
 
                     return $small_before.$this->formatParser($size[2]).$small_after;
                 } else {
-                    return '<nowiki>' . $text . '</nowiki>';
+                    return '<nowiki>'.$text.'</nowiki>';
                 }
             default:
                 return $type.$text.$type;
@@ -866,8 +868,9 @@ class NamuMark {
                         break;
                     }
                 }
-                if($quit)
+                if($quit) {
                     break;
+                }
 
                 if(!$match) {
                     // indent
