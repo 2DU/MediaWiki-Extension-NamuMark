@@ -19,13 +19,13 @@ git clone https://github.com/Oriwiki/php-namumark-mediawiki.git NamuMark
 3. LocalSettings.php에 다음을 입력합니다.
 
 ```php
-	require_once "$IP/extensions/NamuMark/namumark.php";
-	$wgAllowImageTag = true;
-	$wgNamespacesWithSubpages[NS_MAIN] = true;
-	$wgNamespacesWithSubpages[NS_TEMPLATE] = true;
-	$wgAllowDisplayTitle = true;
-	$wgRestrictDisplayTitle = false;
-	$wgDefaultUserOptions['numberheadings'] = 1;
+require_once "$IP/extensions/NamuMark/namumark.php";
+$wgAllowImageTag = true;
+$wgNamespacesWithSubpages[NS_MAIN] = true;
+$wgNamespacesWithSubpages[NS_TEMPLATE] = true;
+$wgAllowDisplayTitle = true;
+$wgRestrictDisplayTitle = false;
+$wgDefaultUserOptions['numberheadings'] = 1;
 ```
 
 	
