@@ -1,22 +1,12 @@
 <?php
 	// Take credit for your work.
 	$wgExtensionCredits['parserhook'][] = array(
-		// The full path and filename of the file. This allows MediaWiki
-		// to display the Subversion revision number on Special:Version.
 		'path' => __FILE__,
-		// The name of the extension, which will appear on Special:Version.
-		'name' => '나무마크 미디어위키판',
-		// A description of the extension, which will appear on Special:Version.
-		'description' => 'PHP 나무마크를 미디어위키에 적용합니다.',
-		// The version of the extension, which will appear on Special:Version.
-		// This can be a number or a string.
-		'version' => '1.1.8.2',
-		// Your name, which will appear on Special:Version.
-		'author' => 'koreapyj 원본, 김동동 수정',
-		// The URL to a wiki page/web page with information about the extension,
-		// which will appear on Special:Version.
-		'url' => 'https://github.com/Oriwiki/php-namumark-mediawiki',
-		// Short name of the license, links LICENSE or COPYING file if existing - string, added in 1.23.0
+		'name' => '미디어위키-나무마크(오리마크)',
+		'description' => '미디어위키에서 나무마크를 사용가능하게 합니다.',
+		'version' => '2.0.0.0-Beta',
+		'author' => 'koreapyj 원본, 김동동 수정, 2DU 재 설계',
+		'url' => 'https://github.com/2DU/PHP-OriMark',
 		'license-name' => "AGPL-3.0",
 	);
 
@@ -25,141 +15,123 @@
 	$wgHooks['ParserBeforeTidy'][] = 'NamuMarkHTML2';
 	$wgHooks['ParserAfterTidy'][] = 'NamuMarkExtraHTML';
 
-	require_once('php-namumark.php');
-	require_once("NamuMarkExtra.php");
-	require_once("php-namumark.class1.php");
-	require_once("php-namumark.class2.php");
-	require_once("php-namumark.class3.php");
+	function j_print($data) {
+		echo '<script>console.log("'.preg_replace('/(\(|\)|\'|\"|\n)/', '\\$1', $data).'");</script>';
+	}
 
 	function NamuMark(&$parser, &$text, &$strip_state) {
-		// 문서의 제목을 title로 변수화한다.
-		$title = $parser->getTitle();
+		$title = $parser -> getTitle();
 
-		# 상기의 확인 함수의 반환값과, 현 URI가 히스토리인지 확인하는 함수의 반환값과, 현 문서가 특수:기여 또는 특수:기록인지 확인하는 함수의 반환값을 확인한다.
-		if(!preg_match('/^특수:/', $title) && !preg_match("/&action=history/", $_SERVER["REQUEST_URI"]) && !preg_match('/^사용자:.*\.(css|js)$/', $title)) {
-			$text = html_entity_decode($text,  ENT_QUOTES | ENT_HTML5);   // HTML 엔티티를 디코드한다.
+		$text = preg_replace('/\n/', '<br>', $text);
+		$text = "<br>".$text."<br>";
 
-			# '[[내부 링크|<span style="color:색깔값">표시내용<span>]]'와 같은 내부 링크 글씨의 색깔을 지정하는 방식이 버그를 일으키므로
-			# 미디어위키에서 지원하는 글씨 색 방식으로 바꾼다.
-			$text = preg_replace('/<span style="color:(.*?)">(.*?)<\/span>\]\]/i', '{{글씨 색|$1|$2}}]]', $text);
-			$text = preg_replace('/<font color="(.*?)">(.*?)<\/font>\]\]/i', '{{글씨 색|$1|$2}}]]', $text);
-
-			# 버그 요소 제거
-			$text = preg_replace('/{{{(\|+)}}}/', '<nowiki>$1</nowiki>', $text);
-			$text = preg_replace('/\\\\\\\/', '<slash>', $text);
-			$text = preg_replace('/\\\(.)/', '<nowiki>$1</nowiki>', $text);
-			$text = preg_replace("/<slash>/", "\\", $text);
-
-			# 문서 구판에 접속시 최상단의 코드를 별도의 변수로 일단 보관하고 제거한다. 파서에 적용되지 않도록 하기 위함. 문서 구판에 접속시 발생하는 버그로 인한 조치.
-			if (preg_match('/&oldid=/', $_SERVER["REQUEST_URI"])) {
-				preg_match('/^.*$/m', $text, $fn);
-				$text = str_replace("$fn[0]", '', $text);
+		while(true) {
+			$include_r = '/\[include\(((?:(?!\)\]).)+)\)\]/';
+			if(preg_match($include_r, $text, $in_data)) {
+				$text = preg_replace($include_r, '{{'.preg_replace('/, ?/', '|', $in_data[1]).'}}', $text, 1);
+			} else {
+				break;
 			}
+		}
 
-			$text = preg_replace('/<pre .*?>(.*?)<\/pre>/s', '<pre>$1</pre>', $text); // pre 태그 뒤에 붙는 모든 속성을 제거한다.
+		$text = preg_replace('/__((?:(?!__).)+)__/', '<u>$1</u>', $text);
+		$text = preg_replace('/--((?:(?!--).)+)--/', '<s>$1</s>', $text);
+		$text = preg_replace('/~~((?:(?!~~).)+)~~/', '<s>$1</s>', $text);
+		$text = preg_replace('/\^\^((?:(?!\^\^).)+)\^\^/', '<sup>$1</sup>', $text);
+		$text = preg_replace('/,,((?:(?!,,).)+),,/', '<sub>$1</sub>', $text);
 
-			# 보조 파서를 불러온다.
-			$Extra = new NamuMarkExtra($text, $title);
-			$Extra->title();
-			$mediawikiTable = $Extra->cutMediawikiTable();
-			$Extra->table();
-			$Extra->indent();
-			$Extra->getTemplateParameter();
-			$text = $Extra->text;
+		$text = preg_replace('/\[목차\]/', '__TOC__', $text);
 
-			# 파서를 불러온다.
-			$wEngine = new NamuMark1($text, $title);
-			$text =  $wEngine->toHtml();
-					
-			# 상기에서 볃도로 보관한 변수의 값을 본문의 바로 앞에 추가한다.
-			if (preg_match('/&oldid=/', $_SERVER["REQUEST_URI"]))
-				$text = $fn[0].$text;
+		$text = preg_replace('/\[br\]/', '<br>', $text);
+		$text = preg_replace('/\[date\]/', date("Y-m-d H:i:s", time()), $text);
+		
+		while(true) {
+			$youtube_r = '/\[(youtube|kakaotv|nicovideo)\(((?:(?!\)\]).)+)\)\]/';
+			if(preg_match($youtube_r, $text, $in_data)) {
+				preg_match('/^([^,]+)/', $in_data[2], $code);
+				preg_match('/width=([0-9]+%?)/', $in_data[2], $width);
+				preg_match('/height=([0-9]+%?)/', $in_data[2], $height);
 
-			preg_match_all('/<html>(.*?)<\/html>/s', $text, $html);
-			require_once 'XSSfilter.php';
-			foreach ($html[1] as $code) {
-				$lines = explode("\n", $code);
-				$code_ex = '';
-				foreach($lines as $key => $line) {
-					if( (!$key && !$lines[$key]) || ($key == count($lines) - 1 && !$lines[$key]) )
-						continue;
-					if (preg_match('/^(:+)/', $line, $match)) {
-						$line = substr($line, strlen($match[1]));
-						$add = '';
-						for ($i = 1; $i <= strlen($match[1]); $i++)
-							$add .= ' ';
-						$line = $add . $line;
-						$code_ex .= $line . "\n";
+				if($in_data[1] != 'kakaotv') {
+					$text = preg_replace($youtube_r, '<'.$in_data[1].' width="'.$width[1].'" height="'.$height[1].'">'.$code[1].'</'.$in_data[1].'>', $text, 1);
+				} else {
+					$text = preg_replace($youtube_r, '{{#tag:tvpot|'.$code[1].'|width='.$width[1].'|height="'.$height[1].'"}}', $text, 1);
+				}
+			} else {
+				break;
+			}
+		}
+
+		$text = preg_replace('/{{\|((?:(?!\|}}).\n*)+)\|}}/', '<div style="border: 1px solid; padding: 10px;">$1</div>', $text);
+
+		while(true) {
+			$block_r = '/((?:<br>)(?:> ?(?:(?:(?!(?:<br>)).)+)?(?:<br>))+)/';
+			if(preg_match($block_r, $text, $in_data)) {
+				$block_data = $in_data[1];
+
+				$block_data = preg_replace('/^(?:<br>)> ?/', '', $block_data);
+				$block_data = preg_replace('/(?:<br>)> ?/', "<br>", $block_data);
+				$block_data = preg_replace('/(?:<br>)$/', '', $block_data);
+
+				$text = preg_replace($block_r, '<br><blockquote>'.$block_data.'</blockquote><br>', $text, 1);
+			} else {
+				break;
+			}
+		}
+
+		while(true) {
+			$list_r = '/((?:<br>)(?:(?: *)\* ?(?:(?:(?!(?:<br>)).)+)(?:<br>))+)/';
+			if(preg_match($list_r, $text, $in_data)) {
+				$li_data = $in_data[1];
+				
+				while(true) {
+					$sub_list_r = '/(?:<br>)(?:( *)\* ?((?:(?!(?:<br>)).)+))/';	
+					if(preg_match($sub_list_r, $li_data, $in_data)) {
+						$data_len = mb_strlen($in_data[1], 'utf-8');
+						if($data_len == 0) {
+							$data_len = 1;
+						}
+						
+						$li_data = preg_replace($sub_list_r, "\n".str_repeat("<star>", $data_len).$in_data[2], $li_data, 1);
 					} else {
-						if(!isset($lines[$key + 1]) || $lines[$key + 1] === '')
-							$code_ex .= $line;
-						else
-							$code_ex .= $line . "\n";
+						break;
 					}
 				}
-				$xss = new XssHtml($code_ex);
-				$text = str_replace($code, $xss->getHtml(), $text);
+
+				$text = preg_replace($list_r, $li_data."\n", $text, 1);
+			} else {
+				break;
 			}
-
-			$Extra = new NamuMarkExtra($text, $title);
-			$Extra->pasteMediawikiTable($mediawikiTable);
-			$text = $Extra->text;
-
 		}
+
+		$text = preg_replace('/<star>/', '*', $text);
+		
+		while(true) {
+			$indent_r = '/<br>( +)/';
+			if(preg_match($indent_r, $text, $in_data)) {
+				$data_len = mb_strlen($in_data[1], 'utf-8');
+
+				$text = preg_replace($indent_r, "\n".str_repeat(":", $data_len), $text, 1);
+			} else {
+				break;
+			}
+		}
+
+		$text = preg_replace('/\[\[(http(?:s):\/\/(?:[^|]+))\|?((?:(?!\]\]).)+)\]\]/', '[$1 $2]', $text);
+
+		$text = preg_replace('/^(?:<br>)+/', '', $text);
+		$text = preg_replace('/(?:<br>)+$/', '', $text);
 	}
 
 	function NamuMarkHTML(Parser &$parser, &$text) {
 		$title = $parser->getTitle();
-		if (!preg_match('/^특수:/', $title) && !preg_match("/&action=history/", $_SERVER["REQUEST_URI"]) && !preg_match('/^사용자:.*\.(css|js)$/', $title)) {
-			$text = str_replace('&apos;', "'", $text);
-			$text = str_replace('&gt;', ">", $text);
-
-			$Extra = new NamuMarkExtra($text, $title);
-			$mediawikiTable = $Extra->cutMediawikiTable();
-			$Extra->table();
-			$text = $Extra->text;
-
-			# 파서를 불러온다.
-			$wEngine = new NamuMark2($text, $title);
-			$text =  $wEngine->toHtml();
-
-			$Extra = new NamuMarkExtra($text, $title);
-			$Extra->pasteMediawikiTable($mediawikiTable);
-			$text = $Extra->text;
-
-		}
 	}
 
 	function NamuMarkHTML2(&$parser, &$text) {
 		$title = $parser->getTitle();
-		if (!preg_match('/^특수:/', $title) && !preg_match("/&action=history/", $_SERVER["REQUEST_URI"]) && !preg_match('/^사용자:.*\.(css|js)$/', $title)) {
-			$text = str_replace("<br /></p>\n<p>", '<br />', $text);
-			$text = str_replace("<p><br />\n</p>", '', $text);
-
-			$text = preg_replace('/<a rel="nofollow" target="_blank" class="external autonumber" href="(.*?)">\[(\[\d+\])\]<\/a>/',
-			'<a rel="nofollow" target="_blank" class="external autonumber" href="$1">$2</a>',
-			$text);
-
-			$text = preg_replace('@^<ol><li><ol><li>.*?</li></ol></li></ol>$@ms', '', $text);
-
-			$Extra = new NamuMarkExtra($text, $title);
-			$Extra->enter();
-			$text = $Extra->text;
-		}
 	}
 
-	function NamuMarkExtraHTML (&$parser, &$text) {
-		// 문서의 제목을 title로 변수화한다.
+	function NamuMarkExtraHTML(&$parser, &$text) {
 		$title = $parser->getTitle();
-
-		if (!preg_match('/^특수:/', $title) && !preg_match("/&action=history/", $_SERVER["REQUEST_URI"]) && !preg_match('/^사용자:.*\.(css|js)$/', $title)) {
-			$Extra = new NamuMarkExtra($text, $title);
-			preg_match('/(<div id="specialchars".*<\/div>)/s', $text, $charinsert);
-			$text = preg_replace('/(<div id="specialchars".*<\/div>)/s', '', $text);
-			$Extra->external();
-			$Extra->imageurl();
-			$Extra->printTemplateParameter();
-			$text = $Extra->text;
-		}
 	}
 ?>
