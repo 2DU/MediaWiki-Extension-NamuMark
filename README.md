@@ -1,4 +1,4 @@
-# 개요
+## 개요
 [나무위키](https://namu.wiki)에서 사용하는 [나무마크](https://namu.wiki/w/%EB%82%98%EB%AC%B4%EC%9C%84%ED%82%A4:%ED%8E%B8%EC%A7%91%20%EB%8F%84%EC%9B%80%EB%A7%90)를 미디어위키 확장기능으로 구현한 것입니다.
 
 ## 라이선스
@@ -19,13 +19,13 @@ git clone https://github.com/Oriwiki/php-namumark-mediawiki.git NamuMark
 3. LocalSettings.php에 다음을 입력합니다.
 
 ```php
-	require_once "$IP/extensions/NamuMark/namumark.php";
-	$wgAllowImageTag = true;
-	$wgNamespacesWithSubpages[NS_MAIN] = true;
-	$wgNamespacesWithSubpages[NS_TEMPLATE] = true;
-	$wgAllowDisplayTitle = true;
-	$wgRestrictDisplayTitle = false;
-	$wgDefaultUserOptions['numberheadings'] = 1;
+require_once "$IP/extensions/NamuMark/namumark.php";
+$wgAllowImageTag = true;
+$wgNamespacesWithSubpages[NS_MAIN] = true;
+$wgNamespacesWithSubpages[NS_TEMPLATE] = true;
+$wgAllowDisplayTitle = true;
+$wgRestrictDisplayTitle = false;
+$wgDefaultUserOptions['numberheadings'] = 1;
 ```
 
 	
