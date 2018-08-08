@@ -16,7 +16,7 @@
 	$wgHooks['ParserAfterTidy'][] = 'NamuMarkExtraHTML';
 
 	function j_print($data) {
-		echo '<script>console.log("'.preg_replace('/(\(|\)|\'|\"|\n)/', '\\\$1', $data).'");</script>';
+		echo '<!--'."\n".$data."\n".'-->';
 	}
 
 	function table_parser($data, $cel_data, $start_data, $num = 0) {
@@ -180,6 +180,8 @@
 	}
 
 	function NamuMark(&$parser, &$text, &$strip_state) {
+		error_reporting(E_ALL);
+		ini_set("display_errors", 1);
 		$title = $parser -> getTitle();
 
 		$text = preg_replace('/\r/', "", $text);
@@ -205,6 +207,7 @@
 		$middle_list = array();
 		$middle_number = 0;
 		$fol_num = 0;
+		# 에러남 다시 설계 바람
 		while(true) {
 			$middle_r = '/(?:{{{((?:(?! |{{{|}}}).)*) ?|(}}}))/';
 			if(preg_match($middle_r, $text, $middle_data)) {
@@ -237,22 +240,22 @@
 								array_push($middle_list, 'span');
 
 								if($in_data[1] == '+') {
-									$font_size = (string)((int)$middle_search[2] * 20 + 100);
+									$font_size = (string)((int)$in_data[2] * 20 + 100);
 								} else {
-									$font_size = (string)(100 - (int)$middle_search[2] * 10);
+									$font_size = (string)(100 - (int)$in_data[2] * 10);
 								}
 
 								$text = preg_replace($middle_r, '<span style="font-size: '.$font_size.'%;">', $text, 1);
 							} else if(preg_match('/^#!wiki/', $middle_data[1], $in_data)) {
 								$wiki_r = '/{{{#!wiki(?: style=(?:&quot;|&#x27;)((?:(?!&quot;|&#x27;).)*)(?:&quot;|&#x27;))?\n?/';
-								if(preg_match($wiki_r, $text, $$middle_data_2)) {
+								if(preg_match($wiki_r, $text, $middle_data_2)) {
 								} else {
-									$$middle_data_2 = array('', '');
+									$middle_data_2 = array(' ', ' ');
 								}
 								
 								array_push($middle_list, 'div_end');
 
-								$text = preg_replace($wiki_r, '<div id="wiki_div" style="'.(string)$middle_data_2[1] + '">', $text, 1);
+								$text = preg_replace($wiki_r, '<div id="wiki_div" style="'.$middle_data_2[1] + '">', $text, 1);
 							} else {
 								array_push($middle_list, 'span');
 
@@ -396,7 +399,6 @@
 
 		$text = preg_replace('/\[\[(http(?:s)?:\/\/(?:(?:(?!\]\]|\|).)+))\|((?:(?!\]\]).)+)\]\]/s', '[$1 $2]', $text);
 		$text = preg_replace('/\[\[(http(?:s)?:\/\/(?:(?:(?!\]\]).)+))\]\]/', '[$1 $1]', $text);
-		j_print($text);
 
 		$text = preg_replace('/(?:<br>)(={1,6})([^=]+)={1,6}(?:<br>)/', "\n$1$2$1\n", $text);
 		$text = preg_replace('/(?:\n)(={1,6})([^=]+)={1,6}(?:<br>)/', "\n$1$2$1\n", $text);
@@ -404,8 +406,6 @@
 
 		$text = preg_replace('/^(?:<br>)+/', '', $text);
 		$text = preg_replace('/(?:<br>)+$/', '', $text);
-
-		$text = preg_replace('/class="warningbox"><br>/', 'class="warningbox">', $text);
 	}
 
 	function NamuMarkHTML(Parser &$parser, &$text) {
