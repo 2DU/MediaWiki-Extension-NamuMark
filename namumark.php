@@ -1,23 +1,8 @@
 <?php
-	// Take credit for your work.
-	$wgExtensionCredits['parserhook'][] = array(
-		'path' => __FILE__,
-		'name' => '미디어위키-나무마크(오리마크)',
-		'description' => '미디어위키에서 나무마크를 사용가능하게 합니다.',
-		'version' => '2.0.0.0-Beta',
-		'author' => 'koreapyj 원본, 김동동 수정, 2DU 재 설계',
-		'url' => 'https://github.com/2DU/PHP-OriMark',
-		'license-name' => "AGPL-3.0",
-	);
+	error_reporting(E_ALL);
+	ini_set("display_errors", 1);
 
-	$wgHooks['ParserBeforeStrip'][] = 'NamuMark';
-	$wgHooks['InternalParseBeforeLinks'][] = 'NamuMarkHTML';
-	$wgHooks['ParserBeforeTidy'][] = 'NamuMarkHTML2';
-	$wgHooks['ParserAfterTidy'][] = 'NamuMarkExtraHTML';
-
-	function j_print($data) {
-		echo '<!--'."\n".$data."\n".'-->';
-	}
+	header('Content-Type: text/html; charset=UTF-8');
 
 	function table_parser($data, $cel_data, $start_data, $num = 0) {
 		$table_class = 'class="';
@@ -179,11 +164,7 @@
 		return $data;
 	}
 
-	function NamuMark(&$parser, &$text, &$strip_state) {
-		error_reporting(E_ALL);
-		ini_set("display_errors", 1);
-		$title = $parser -> getTitle();
-
+	function NamuMark($text) {
 		$text = preg_replace('/\r/', "", $text);
 		$text = preg_replace('/\n/', "<br>", $text);
 		$text = "<br>".$text."<br>";
@@ -409,15 +390,6 @@
 		$text = preg_replace('/(?:<br>)+$/', '', $text);
 	}
 
-	function NamuMarkHTML(Parser &$parser, &$text) {
-		$title = $parser->getTitle();
-	}
-
-	function NamuMarkHTML2(&$parser, &$text) {
-		$title = $parser->getTitle();
-	}
-
-	function NamuMarkExtraHTML(&$parser, &$text) {
-		$title = $parser->getTitle();
-	}
+	$fp = file("input.txt");	
+	echo implode($fp, "\n");
 ?>
