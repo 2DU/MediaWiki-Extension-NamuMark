@@ -247,15 +247,16 @@
 
 								$text = preg_replace($middle_r, '<span style="font-size: '.$font_size.'%;">', $text, 1);
 							} else if(preg_match('/^#!wiki/', $middle_data[1], $in_data)) {
-								$wiki_r = '/{{{#!wiki(?: style=(?:&quot;|&#x27;)((?:(?!&quot;|&#x27;).)*)(?:&quot;|&#x27;))?\n?/';
-								if(preg_match($wiki_r, $text, $middle_data_2)) {
-								} else {
-									$middle_data_2 = array(' ', ' ');
-								}
-								
 								array_push($middle_list, 'div_end');
+								
+								$wiki_r = '/{{{#!wiki(?: style=[\'\"]((?:(?!&quot;|&#x27;).)*)[\'\"])?\n?/';
+								if(preg_match($wiki_r, $text, $middle_data_2)) {
+									$text = preg_replace($wiki_r, '<div id="wiki_div" style="'.$middle_data_2[1].'">', $text, 1);
+								} else {
+									$text = preg_replace($wiki_r, '<div id="wiki_div" style="">', $text, 1);
+								}
 
-								$text = preg_replace($wiki_r, '<div id="wiki_div" style="'.$middle_data_2[1] + '">', $text, 1);
+								
 							} else {
 								array_push($middle_list, 'span');
 
